@@ -1,0 +1,8 @@
+{
+  "name": "Remix Xpert Diagnostics Laboratory Management System (PLMS/LIS)",
+  "description": "Enterprise-grade Laboratory Information System (LIS) for diagnostic pathology laboratories in Pakistan. Covers patient registration, barcode accessioning, departmental worklists, Westgard QC, technical verification, clinical pathologist authorization, and professional A4 reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,817 @@
+# MASTER SOFTWARE ENGINEERING PROMPT
+## PRIVATE DIAGNOSTIC & PATHOLOGY LABORATORY MANAGEMENT SYSTEM (PLMS/LIS)
+
+### 1. PROJECT MISSION
+
+Act as a senior healthcare software architect, laboratory information systems engineer, full-stack developer, database architect, cybersecurity specialist, quality-management consultant, and DevOps engineer.
+
+Design and implement a complete, secure, production-oriented Laboratory Management System (LMS/LIS) for a private diagnostic and pathology laboratory in Pakistan.
+
+The application must manage the laboratory's entire operation, from patient registration to specimen collection, analytical testing, result validation, pathologist authorization, professional report generation, billing, inventory, laboratory quality control, and management reporting.
+
+The result must be a genuine, database-driven application with functional interfaces, business rules, automated tests, documentation, and deployment configuration. Do not build a static prototype or present mock functionality as completed software.
+
+The laboratory must be able to operate on its internal network without a continuous internet connection and synchronize selected information with secured cloud services.
+
+### 2. LABORATORY SCOPE
+
+The laboratory performs eligible diagnostic investigations in-house and may refer selected tests to external reference laboratories.
+
+Design the system to support these configurable departments:
+
+1. Hematology.
+2. Clinical chemistry and biochemistry.
+3. Clinical pathology and urinalysis.
+4. Serology and immunology.
+5. Clinical microbiology.
+6. Coagulation.
+7. Histopathology.
+8. Cytopathology.
+9. Molecular diagnostics.
+10. Endocrinology and immunoassays.
+11. Other laboratory specialties configured by the administrator.
+
+These are optional, configurable departments. Activate only the departments and investigations that the laboratory actually offers and is authorized and equipped to perform.
+
+Support manual result entry for suitable tests, validated analyzer result imports, and referral laboratory results. Each result must identify its origin and follow the appropriate verification and authorization workflow.
+
+### 3. RECOMMENDED TECHNOLOGY STACK
+
+Frontend:
+- React with TypeScript and Vite.
+- Tailwind CSS and an accessible component library.
+- React Router.
+- TanStack Query.
+- React Hook Form and Zod.
+- Responsive, keyboard-accessible laboratory workflows.
+
+Backend:
+- Node.js using a supported LTS release.
+- NestJS with TypeScript.
+- Versioned REST API under /api/v1.
+- OpenAPI documentation.
+- Server-side validation and authorization.
+- Background workers for notifications, document processing, and synchronization.
+
+Database:
+- PostgreSQL.
+- Prisma ORM or an equivalent typed database layer.
+- Reviewed, version-controlled database migrations.
+- Relational constraints, appropriate indexes, and transactional operations.
+
+Infrastructure:
+- Docker and Docker Compose.
+- Local persistent storage for operational documents.
+- Secure cloud object storage for off-site copies where required.
+- Encrypted backup procedures.
+- Structured logging and operational monitoring.
+
+Testing:
+- Unit and integration tests.
+- API and authorization tests.
+- Playwright end-to-end tests.
+- Database migration tests.
+- Concurrency and synchronization tests.
+- Backup restoration tests.
+
+Use a modular monolith with clearly defined domain modules. Do not introduce microservices unless there is a demonstrated operational need.
+
+### 4. HYBRID CLOUD AND LOCAL NETWORK ARCHITECTURE
+
+Deploy the primary application and operational database on a secured local laboratory server.
+
+Local components:
+- Web frontend.
+- Backend API.
+- PostgreSQL.
+- Local report and document storage.
+- Background processing.
+- Cloud synchronization worker.
+- Local backup and monitoring services.
+
+Cloud components may include:
+- Encrypted off-site backups.
+- Secure remote access.
+- Optional patient and physician portals.
+- Central administration for authorized deployments.
+- Approved messaging and report-delivery integrations.
+- Monitoring and synchronization status.
+
+Use the local database as the authoritative source for local laboratory transactions.
+
+Implement a transactional outbox pattern so that changes requiring cloud synchronization are recorded with the corresponding local business transaction.
+
+The synchronization service must support:
+- Authenticated and encrypted connections.
+- Stable event identifiers.
+- Idempotent processing.
+- Retry with appropriate backoff.
+- Acknowledgements.
+- Failure monitoring.
+- Duplicate detection.
+- Conflict review.
+- Recovery after internet outages.
+
+Never allow uncoordinated cloud and local databases to overwrite clinical or financial records through last-write-wins synchronization.
+
+Keep essential LAN workflows operational during internet outages. Clearly identify delayed cloud synchronization, failed message delivery, and unavailable remote services.
+
+Never report a backup, delivery, synchronization, or restoration operation as successful unless the operation has been verified.
+
+### 5. USER ROLES AND PERMISSIONS
+
+Implement server-enforced role-based access control.
+
+Administrator:
+- Manage configuration, accounts, departments, roles, and system settings.
+- Review audit records and system health.
+- Manage backup and deployment settings.
+
+Receptionist:
+- Register patients.
+- Create orders.
+- Print labels and receipts.
+- Access permitted patient information.
+
+Phlebotomist:
+- Manage collection worklists.
+- Record collection details.
+- Document recollection and collection exceptions.
+
+Laboratory technician:
+- Access assigned departmental worklists.
+- Record analytical results.
+- Review permissible analyzer imports and technical information.
+- Record repeats, dilutions, and processing comments.
+
+Department supervisor:
+- Review technical exceptions.
+- Manage assigned worklists.
+- Perform authorized technical verification.
+
+Pathologist or authorized result reviewer:
+- Review eligible clinical results.
+- Record permitted interpretations.
+- Authorize and release reports within assigned clinical scope.
+
+Cashier:
+- Manage invoices, payments, receipts, refunds, and daily reconciliation.
+
+Inventory manager:
+- Manage reagents, consumables, stock lots, suppliers, and purchase orders.
+
+Quality manager:
+- Manage QC records, equipment maintenance, nonconformities, and corrective actions.
+
+Auditor:
+- Read-only access to authorized audit records.
+
+Optional patient and physician portal users:
+- Access only records associated with their verified identity and authorized relationship.
+
+Support granular permissions for viewing, creating, editing, verifying, approving, releasing, exporting, and administering records.
+
+Prevent unauthorized users from changing clinical results, authorizing their own results when independent review is required, modifying released reports, or bypassing financial audit controls.
+
+### 6. PATIENT REGISTRATION
+
+Implement:
+- Unique patient identifier.
+- Configurable human-readable patient number.
+- Patient name and optional Urdu/local-language name.
+- Date of birth or documented estimated age.
+- Clinically relevant demographic fields.
+- Contact number and address.
+- Referring physician.
+- Registration timestamp and operator.
+- Relevant consent and communication preferences.
+- Patient history and authorized previous results.
+
+Support search by patient number, name, phone, accession number, and order identifier.
+
+Provide duplicate detection and a controlled patient-merge workflow. Never automatically merge patients solely because their names or telephone numbers match.
+
+Keep demographic corrections auditable.
+
+### 7. PHYSICIAN, REFERRAL, AND CORPORATE ACCOUNTS
+
+Manage:
+- Referring physicians and specialties.
+- Clinics, hospitals, and organizations.
+- Referral sources.
+- Contractual and negotiated pricing.
+- Authorized report-delivery preferences.
+- Corporate accounts and credit arrangements.
+- Referral and revenue analytics.
+
+Implement record-level permissions for patient histories and report access.
+
+### 8. TEST CATALOG AND CLINICAL CONFIGURATION
+
+Maintain a configurable catalog of tests and panels.
+
+For each test, support:
+- Unique test code and display name.
+- Department and subdepartment.
+- Specimen type and container requirements.
+- Collection and transport instructions.
+- Performing location.
+- Methodology.
+- Instrument association where applicable.
+- Routine and urgent priorities.
+- Expected turnaround time.
+- Price and currency.
+- Panel membership.
+- Result fields and permitted types.
+- Units and decimal precision.
+- Versioned reference intervals.
+- Validated critical-result rules.
+- Method-specific interpretive comments.
+- Specimen acceptance and rejection rules.
+- Active/inactive status.
+- Effective dates and configuration history.
+
+Provide configurable examples such as CBC, blood glucose, renal function, liver function, lipid profile, thyroid profile, urinalysis, coagulation tests, culture and sensitivity, and other services the laboratory actually provides.
+
+Panels must support component-level results without accidental duplicate testing or duplicate billing.
+
+Do not hardcode universal reference intervals, critical thresholds, diagnostic cutoffs, or susceptibility interpretations. Such rules must be reviewed, approved, versioned, and maintained by appropriately qualified laboratory personnel.
+
+### 9. ORDERS, SPECIMENS, AND BARCODE TRACKING
+
+Generate unique order numbers, accession numbers, and specimen identifiers using concurrency-safe mechanisms.
+
+Each order must contain:
+- Patient.
+- Ordered test items.
+- Referring physician.
+- Ordering staff member.
+- Department.
+- Priority.
+- Order date and time.
+- Collection status.
+- Specimen requirements.
+- Billing status.
+- Expected completion.
+- Amendment and cancellation history.
+
+Each specimen must contain:
+- Unique specimen identifier.
+- Barcode.
+- Linked order and test requirements.
+- Specimen type and container.
+- Collection date and time.
+- Collector identity.
+- Receipt time.
+- Acceptance or rejection state.
+- Rejection reason.
+- Storage or processing location where required.
+- Aliquot and parent specimen links where applicable.
+- Disposal or retention information.
+
+Provide:
+- Barcode and QR-code labels.
+- Supported label-printer formats.
+- Barcode scanning.
+- Collection worklists.
+- Specimen receiving.
+- Recollection workflows.
+- Sample rejection reports.
+- Specimen location history.
+- Chain-of-custody records where required.
+
+A specimen identity correction must be controlled, justified, and audited. Never silently change the specimen's identity.
+
+### 10. LABORATORY WORKLISTS AND DEPARTMENT MODULES
+
+Create dedicated worklists for each enabled department.
+
+Hematology:
+- CBC and differential result fields.
+- Numeric validation.
+- Configurable units and reference intervals.
+- Instrument flags and manual review.
+- Blood-film comments and narrative findings where supported.
+
+Clinical chemistry:
+- Analyte-based results.
+- Numeric precision and units.
+- Configurable reference intervals.
+- Delta checks where validated.
+- Result flags and instrument comments.
+
+Clinical pathology:
+- Urine and other body-fluid analysis.
+- Macroscopic, chemical, and microscopic findings as applicable.
+- Structured result fields and descriptive comments.
+
+Microbiology:
+- Specimen source and adequacy.
+- Culture status.
+- Organism identification.
+- Antimicrobial susceptibility results.
+- Validated interpretation standards and version identifiers.
+- Authorized narrative conclusions.
+
+Serology and immunology:
+- Qualitative and quantitative observations.
+- Assay-specific units and thresholds.
+- Positive, negative, equivocal, and other permitted categories.
+
+Coagulation:
+- Numeric and derived results.
+- Assay-specific reference intervals.
+- Validation of permitted calculations.
+- Review flags.
+
+Histopathology:
+- Specimen site and laterality.
+- Clinical history.
+- Gross description.
+- Tissue processing and block/slide tracking.
+- Microscopic findings.
+- Structured diagnostic fields where applicable.
+- Final diagnosis and authorized sign-out.
+- Addenda and amended reports.
+
+Cytopathology:
+- Specimen adequacy.
+- Structured descriptive findings.
+- Configurable diagnostic categories.
+- Authorized interpretation.
+
+Molecular diagnostics:
+- Assay identification.
+- Qualitative or quantitative results.
+- Control and run status.
+- Validated assay-specific interpretation.
+- Relevant method and detection-limit information where applicable.
+
+Implement only the workflows needed by the laboratory's actual service scope. Ensure every department's results are connected to the central order, specimen, authorization, audit, and reporting infrastructure.
+
+### 11. RESULT ENTRY AND VALIDATION
+
+Support:
+- Numeric results.
+- Text and narrative results.
+- Categorical observations.
+- Positive, negative, indeterminate, and not-detected values where appropriate.
+- Structured observations.
+- Units, reference intervals, and abnormal flags.
+- Technical comments.
+- Instrument source.
+- Manual entry.
+- Previous-result comparison.
+- Delta checks where validated.
+- Repeat testing and dilution documentation.
+- Result entry and modification history.
+
+Validate required fields, result types, applicable units, and configuration rules on the server.
+
+Maintain separate states for:
+- Draft.
+- Entered.
+- Technical verification.
+- Clinical review when required.
+- Authorized.
+- Released.
+- On hold.
+- Repeat required.
+- Correction required.
+- Amended.
+- Cancelled.
+
+Do not silently round or convert clinical values in ways that change their meaning.
+
+Do not allow incomplete, unverified, or unauthorized results to be released in violation of configured laboratory policy.
+
+Preserve every released version and the identity of the person who authorized it.
+
+### 12. INSTRUMENT INTEGRATION
+
+Build an extensible adapter framework for laboratory analyzers.
+
+Support suitable integration methods such as:
+- Validated CSV or structured file import.
+- Serial or TCP/IP connections where supported.
+- ASTM or HL7 interfaces where applicable.
+- Other vendor-specific interfaces through isolated adapters.
+
+Include:
+- Instrument identifiers.
+- Message parsing and validation.
+- Patient, order, specimen, and test matching.
+- Code and unit mapping.
+- Duplicate message detection.
+- Unmatched-result work queues.
+- Instrument and communication logs.
+- Error handling and retry.
+- Result staging.
+- Review and authorization.
+
+An imported instrument value must not automatically become a released result simply because it was received successfully.
+
+Manual entry must remain available for supported tests when an analyzer interface is unavailable, with source attribution and appropriate verification.
+
+Do not claim a working analyzer interface until the actual instrument protocol has been obtained, implemented, and tested against representative messages.
+
+### 13. QUALITY CONTROL AND QUALITY MANAGEMENT
+
+Implement:
+- Internal QC records.
+- Control material and lot information.
+- Target values and acceptable limits.
+- Instrument and analyte associations.
+- QC review and approval.
+- Levey–Jennings charts.
+- Configurable Westgard rule evaluation where applicable.
+- QC failure alerts.
+- Testing holds where required.
+- Corrective and preventive action records.
+- Nonconformity and incident reporting.
+- Equipment maintenance and calibration.
+- Temperature logs where relevant.
+- External quality assessment and proficiency testing records.
+- SOP and document version control.
+- Staff training and competency tracking.
+- Quality indicators.
+
+QC acceptance criteria must be configured and approved by qualified laboratory staff. Failed or missing required QC must trigger the laboratory's approved hold and escalation policy.
+
+Do not assume that storing a QC result proves that a run is acceptable.
+
+### 14. RESULT AUTHORIZATION AND CRITICAL COMMUNICATION
+
+Implement configurable technical verification and clinical authorization.
+
+Before release, evaluate the applicable requirements:
+- Specimen acceptance.
+- Required tests completed.
+- Mandatory technical review completed.
+- QC and instrument status acceptable.
+- Required pathologist or authorized reviewer approval.
+- Relevant flags and unresolved exceptions addressed.
+
+For critical results:
+- Apply the configured escalation rules.
+- Record the result requiring escalation.
+- Record the recipient and communication method.
+- Record communication attempts and timestamps.
+- Record acknowledgement and recipient identity.
+- Escalate failed contact according to policy.
+
+Generating an alert does not prove that a clinician was notified.
+
+Released reports must be protected from silent changes. Corrected reports and addenda must preserve prior versions and clearly identify the revision.
+
+### 15. PROFESSIONAL REPORT GENERATION
+
+Generate high-quality, print-ready A4 PDF reports.
+
+Include:
+- Laboratory name, logo, address, and contact details.
+- Relevant license or accreditation details only when verified and authorized.
+- Patient name and identifiers.
+- Age and other permitted demographic data.
+- Accession and order identifiers.
+- Referring physician.
+- Specimen type.
+- Collection and receipt timestamps where relevant.
+- Test names and results.
+- Units and applicable reference intervals.
+- Abnormal and critical indicators.
+- Methodology and interpretive notes where required.
+- Performing laboratory identification when testing is outsourced.
+- Report status and version.
+- Authorizing professional's identity and credentials.
+- Release timestamp.
+- Page numbers and confidentiality notice.
+
+Support:
+- Department-specific templates.
+- Multi-page reports.
+- Urdu and Unicode-compatible rendering where enabled.
+- Configurable signatures.
+- Secure report access.
+- Reprints with audit records.
+- Amended and corrected report workflows.
+- Secure email or portal delivery.
+
+The report must reproduce the authorized result version, not a mutable draft. Never invent accreditation claims, medical credentials, reference intervals, or diagnostic interpretations.
+
+### 16. BILLING AND FINANCIAL MANAGEMENT
+
+Provide:
+- Test-level and panel-level pricing.
+- Automatic invoice generation.
+- Itemized charges.
+- Discounts and approval limits.
+- Configurable taxes where applicable.
+- Cash, card, bank transfer, and configured payment methods.
+- Deposits and partial payments.
+- Corporate and credit accounts.
+- Receipts.
+- Outstanding balances.
+- Refunds and credit notes.
+- Invoice corrections.
+- Daily cashier closing.
+- Shift reconciliation.
+- Revenue and collection reports.
+
+Use atomic database transactions for financial operations.
+
+Prevent duplicate payments with idempotency controls. Do not delete financial records to conceal mistakes; use audited corrections and reversals.
+
+Configure pricing, discount authority, taxes, and any report-release restrictions according to approved business policy.
+
+### 17. INVENTORY, REAGENTS, AND EQUIPMENT
+
+Manage:
+- Reagents and consumables.
+- Collection tubes and containers.
+- Calibrators and control materials.
+- Suppliers.
+- Purchase orders and goods receipt.
+- Lot and batch numbers.
+- Expiry dates.
+- Stock movement.
+- Reorder alerts.
+- Storage location and conditions.
+- Quarantine and recall status.
+- Waste and disposal.
+- Equipment registers.
+- Calibration and maintenance records.
+- Downtime and incidents.
+- Reagent and QC lot traceability where required.
+
+Prevent prohibited issue or use of expired, recalled, or quarantined materials according to the laboratory's approved rules.
+
+### 18. DASHBOARD AND BUSINESS ANALYTICS
+
+Build a live dashboard showing:
+- Today's patients and orders.
+- Tests pending and in progress.
+- Results awaiting verification.
+- Reports awaiting authorization.
+- Completed and released reports.
+- Critical results requiring acknowledgement.
+- Rejected and recollected specimens.
+- Overdue investigations.
+- Department workload.
+- Turnaround-time performance.
+- Daily and monthly revenue.
+- Outstanding balances.
+- Discounts and refunds.
+- Inventory alerts.
+- QC exceptions.
+- Equipment downtime.
+
+Provide date, department, physician, test, and performing-location filters according to permissions.
+
+Define turnaround time precisely, including start event, end event, paused periods, and exclusions. Distinguish collection, analytical, verification, and report-release intervals.
+
+Do not display fictional statistics as genuine operational information.
+
+### 19. DATABASE AND DATA INTEGRITY
+
+Use a normalized PostgreSQL schema containing at least the following core entities:
+
+- organizations
+- branches
+- departments
+- users
+- roles
+- permissions
+- patients
+- patient_identifiers
+- physicians
+- referral_organizations
+- test_catalog
+- test_catalog_versions
+- test_panels
+- panel_components
+- laboratory_orders
+- order_items
+- specimens
+- specimen_events
+- result_definitions
+- result_observations
+- result_versions
+- reference_intervals
+- interpretive_rules
+- instruments
+- instrument_messages
+- qc_materials
+- qc_results
+- report_templates
+- reports
+- report_versions
+- report_release_events
+- critical_result_events
+- invoices
+- invoice_items
+- payments
+- payment_allocations
+- refunds
+- credit_notes
+- inventory_items
+- inventory_lots
+- stock_movements
+- suppliers
+- purchase_orders
+- equipment
+- maintenance_records
+- quality_incidents
+- corrective_actions
+- notifications
+- notification_deliveries
+- audit_events
+- outbox_events
+- sync_attempts
+- application_settings
+
+Extend or refine the schema as necessary.
+
+Database requirements:
+- UUID primary keys.
+- Unique human-readable identifiers where required.
+- Foreign keys and appropriate deletion restrictions.
+- Transaction-safe accession numbering.
+- Correct monetary data types.
+- Consistent timestamp storage.
+- Versioned clinical configuration.
+- Optimistic locking or equivalent protection against conflicting updates.
+- Server-side pagination.
+- Appropriate indexes.
+- Version-controlled migrations.
+- Documented retention behavior.
+
+Provide an ER diagram and explain the relationships between major entities.
+
+### 20. SECURITY AND PRIVACY
+
+Implement:
+- Secure authentication.
+- Strong password hashing.
+- Session expiry and revocation.
+- Multi-factor authentication where appropriate.
+- Least-privilege authorization.
+- TLS for network communication.
+- Input validation and output encoding.
+- Protection against SQL injection, XSS, CSRF where applicable, IDOR, and privilege escalation.
+- Rate limiting.
+- Secure file uploads and downloads.
+- Secret management outside source control.
+- Encrypted backups.
+- Sensitive-record access auditing.
+- Security monitoring.
+- Documented incident response.
+- Dependency and container scanning.
+
+Protect patient data in logs, notifications, exports, and temporary files.
+
+Never rely on frontend authorization alone. Do not expose the database directly to the public internet.
+
+### 21. PAKISTAN LOCALIZATION
+
+Default settings:
+- Country: Pakistan.
+- Currency: PKR.
+- Time zone: Asia/Karachi.
+- Interface language: English.
+- Optional Urdu and right-to-left support.
+- Configurable Pakistani contact numbers and address fields.
+- Configurable invoices, receipts, and numbering.
+- Configurable taxes and applicable statutory settings.
+
+Validate applicable provincial healthcare commission licensing and clinical laboratory standards before clinical deployment.
+
+Where the facility operates in Punjab, include a compliance review against applicable Punjab Healthcare Commission requirements. Determine the facility category and the services permitted by its license.
+
+Design the system to support evidence collection, SOP documentation, equipment records, competency records, QC monitoring, and quality indicators.
+
+ISO 15189:2022 may be used as a quality and competence reference where applicable, but do not claim accreditation or automatic legal compliance.
+
+Keep legal and clinical requirements as documented verification tasks. Do not invent mandatory fields, tax rates, diagnostic cutoffs, reference intervals, or regulatory approvals.
+
+### 22. TESTING AND ACCEPTANCE
+
+Write unit, integration, authorization, concurrency, and end-to-end tests.
+
+Verify that:
+1. A patient can be registered and searched.
+2. A test order and unique accession are generated.
+3. A barcode can be printed and scanned.
+4. A specimen can be accepted, rejected, or recollected.
+5. An authorized technician can enter results.
+6. Invalid result types and prohibited transitions are rejected.
+7. Analyzer messages are validated and deduplicated.
+8. Required failed QC blocks prohibited result release.
+9. Unauthorized users cannot verify or authorize results.
+10. An authorized reviewer can release a report.
+11. A released report cannot be silently changed.
+12. Amendments preserve previous report versions.
+13. Critical-result communication attempts and acknowledgements are audited.
+14. Payments and refunds persist without duplication.
+15. Expired or quarantined inventory is handled according to policy.
+16. Essential LAN workflows work during internet outages.
+17. Synchronization retries do not duplicate transactions.
+18. Synchronization conflicts are recorded and reviewed.
+19. Encrypted backups can be restored and verified.
+20. Sensitive information is not exposed through public links or logs.
+
+Do not claim tests passed unless they have actually been executed.
+
+### 23. DEPLOYMENT AND DELIVERABLES
+
+Provide:
+- Complete source code.
+- Architecture diagram.
+- Database ER diagram.
+- Database migrations.
+- Development-only synthetic seed data.
+- Dockerfiles and Docker Compose.
+- Environment configuration template.
+- API documentation.
+- Automated test suite.
+- Installation guide.
+- Local LAN deployment guide.
+- Hybrid cloud configuration guide.
+- Backup and recovery manual.
+- User and administrator manuals.
+- Security risk register.
+- Requirements-to-test traceability matrix.
+- Production-readiness checklist.
+
+Document installation, upgrades, rollback, firewall setup, access control, backup retention, and restore testing.
+
+Never commit production credentials or insert real patient data into a public demo environment.
+
+### 24. IMPLEMENTATION ROADMAP
+
+Phase 1: Foundation
+- Inspect the repository.
+- Build application skeleton and design system.
+- Implement authentication, roles, database migrations, and audit events.
+
+Phase 2: Core laboratory workflow
+- Patient registration.
+- Test catalog.
+- Orders.
+- Specimen collection.
+- Barcodes.
+- Department worklists.
+
+Phase 3: Results and reporting
+- Result entry.
+- QC-aware validation.
+- Technical verification.
+- Clinical authorization.
+- PDF reports.
+- Amendments and critical-result workflows.
+
+Phase 4: Financial and operational modules
+- Billing.
+- Payments.
+- Refunds.
+- Inventory.
+- Equipment and quality records.
+
+Phase 5: External integrations and resilience
+- Analyzer interfaces where available.
+- Referral laboratory tracking.
+- Cloud synchronization.
+- Off-site backups.
+- Offline and recovery testing.
+
+Phase 6: Verification and deployment
+- Complete automated tests.
+- Review security and operational risks.
+- Verify backup recovery.
+- Conduct user acceptance testing.
+- Deploy to staging.
+- Complete the production-readiness assessment.
+
+### 25. FIRST IMPLEMENTATION TASK
+
+Inspect the existing development environment. If the repository is empty, scaffold the specified stack. Otherwise, preserve useful existing functionality.
+
+Before implementing all modules, produce:
+- A component architecture.
+- An ER diagram.
+- A role-permission matrix.
+- A laboratory workflow and state-transition map.
+- A clinical configuration risk register.
+- An implementation roadmap.
+
+Then implement the first complete end-to-end vertical slice:
+
+Patient registration → Order entry → Specimen collection → Barcode accessioning → In-house result entry → Required technical verification → Authorized clinical review → PDF report generation and release.
+
+Include a clearly separated, optional referral pathway for tests that the laboratory does not perform in-house.
+
+Connect all stages to persistent storage, server-side authorization, audit events, and automated tests.
+
+Report which features are complete, incomplete, blocked, and actually tested.
+
+The final product must be secure, maintainable, auditable, clinically configurable, operationally reliable, and ready for laboratory-specific validation before live clinical use.
